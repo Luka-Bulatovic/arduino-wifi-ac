@@ -5,84 +5,112 @@
 template<typename KeyType, typename ValueType>
 class Map {
 private:
+  static const byte capacity = 8;
+  
   struct Node {
     KeyType key;
     ValueType value;
-    Node* next;
+
+    Node() {}
 
     Node(const KeyType& k, const ValueType& v)
-      : key(k), value(v), next(nullptr) {}
+      : key(k), value(v) {}
   };
 
-  Node* head;
+  Node items[capacity];
+
+  ValueType nullValue;  // Null value to return when the key is not found.
 
 public:
-  Map()
-    : head(nullptr) {}
+  byte size;
+
+  Map() { size = 0; }
 
   void insert(const KeyType& key, const ValueType& value) {
-    Node* newNode = new Node(key, value);
-    if (head == nullptr) {
-      head = newNode;
-    } else {
-      Node* current = head;
-      while (current->next != nullptr) {
-        if (current->key == key) {
-          current->value = value;
-          return;
-        }
-        current = current->next;
-      }
-      if (current->key == key) {
-        current->value = value;
-      } else {
-        current->next = newNode;
-      }
-    }
+    if(size >= capacity - 1)
+      return;
+    
+    size++;
+    items[size-1].key = key;
+    items[size-1].value = value;
   }
 
   ValueType& operator[](const KeyType& key) {
-    Node* current = head;
-    Node* prev = nullptr;
-
-    while (current != nullptr) {
-      if (current->key == key) {
-        return current->value;  // Key found, return existing value
-      }
-      prev = current;
-      current = current->next;
+    for(byte i = 0; i < size; i++) {
+      if(items[i].key == key)
+        return items[i].value;
     }
 
-    Node* newNode = new Node(key, ValueType());
-    if (prev == nullptr) {
-      head = newNode;  // Insert as the new head node
-    } else {
-      prev->next = newNode;  // Insert after the last node
-    }
-    return newNode->value;  // Return the newly inserted value
+    return nullValue;
   }
 
   bool containsKey(const KeyType& key) {
-    Node* current = head;
-
-    while (current != nullptr) {
-      if (current->key == key)
+    for(byte i = 0; i < size; i++) {
+      if(items[i].key == key)
         return true;
-
-      current = current->next;
     }
 
     return false;
   }
 
-  ~Map() {
-    Node* current = head;
-    while (current != nullptr) {
-      Node* nextNode = current->next;
-      delete current;
-      current = nextNode;
-    }
+  ~Map() {}
+};
+
+
+
+// Specialized Map for char* keys
+template<typename ValueType>
+class Map<char*, ValueType> {
+private:
+  static const byte capacity = 2;
+  
+  struct Node {
+    char* key;
+    ValueType value;
+
+    Node() {}
+
+    Node(const char* k, const ValueType& v)
+      : key(k), value(v) {}
+  };
+
+  Node items[capacity];
+
+  ValueType nullValue;  // Null value to return when the key is not found.
+
+public:
+  byte size;
+
+  Map() { size = 0; }
+
+  void insert(char* key, const ValueType& value) {
+    if(size > capacity - 1)
+      return;
+    
+    size++;
+    items[size-1].key = key;
+    items[size-1].value = value;
   }
+
+  ValueType& operator[](const char* key) {
+    for(byte i = 0; i < size; i++) {
+      if(strcmp(items[i].key, key) == 0)
+        return items[i].value;
+    }
+
+    return nullValue;
+  }
+
+  bool containsKey(const char* key) {
+    for(byte i = 0; i < size; i++) {
+      if(strcmp(items[i].key, key) == 0)
+        return true;
+    }
+
+    return false;
+  }
+
+  ~Map() {}
 };
 
 #endif

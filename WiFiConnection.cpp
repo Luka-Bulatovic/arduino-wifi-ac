@@ -28,9 +28,9 @@ String WiFiConnection::getDisplayData() {
   }
   else {
     if (WiFi.status() == WL_CONNECTED) {
-      displayData += "Connected! IP: " + WiFi.localIP().toString();
+      displayData = "IP: " + WiFi.localIP().toString();
     } else {
-      displayData += "Not Connected";
+      displayData = "Not Connected";
     }
   }
 

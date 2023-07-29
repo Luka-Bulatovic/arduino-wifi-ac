@@ -14,6 +14,9 @@ WiFiConnection* connectionPtr;
 WebServer* serverPtr;
 SerialCommunication* communication;
 
+unsigned long lastDisplayUpdate = 0;
+String lastDisplayStr = "";
+
 char* sendBuffer;
 
 void handleTestMessage(const char* message) {
@@ -31,15 +34,13 @@ void setup() {
   connectionPtr = new WiFiConnection(wifiSSID, wifiPassword);
   connectionPtr->connect();
 
-  // Start web server
-  serverPtr = new WebServer(80, connectionPtr);
-  serverPtr->begin();
-
   // Setup Serial Communication between ATMega and ESP8266
-  communication = new SerialCommunication(&Serial);
+  communication = new SerialCommunication();
+  communication->setStream(&Serial);
 
-  // Income message handlers
-  //communication->registerHandler("test", handleTestMessage);
+  // Start web server
+  serverPtr = new WebServer(80, connectionPtr, communication);
+  serverPtr->begin();
 }
 
 void loop() {
@@ -55,7 +56,22 @@ void loop() {
     connectionPtr->connect();
   }
 
-  communication->sendMessage("display", sendBuffer);
+  // Send update to display
+  // Get the current time
+  unsigned long currentTime = millis();
+
+  // Check if one second (1000 ms) has passed since the last time the function was called
+  if (currentTime - lastDisplayUpdate >= 1000) {
+    // Call your function here
+    if(displayStr != lastDisplayStr)
+    {
+      lastDisplayStr = displayStr;
+      communication->sendMessage("display", sendBuffer);
+    }
+
+    // Update the last time the function was called
+    lastDisplayUpdate = currentTime;
+  }
 
   delay(1000);
 }

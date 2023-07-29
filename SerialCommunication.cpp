@@ -1,6 +1,10 @@
 // SerialCommunication.cpp
 #include "SerialCommunication.h"
 
+void SerialCommunication::setStream(Stream* stream) {
+  this->stream = stream;
+}
+
 void SerialCommunication::sendMessage(const char* tag, const char* message) {
   stream->print(startMessageMarker);
   stream->print(tag);
@@ -21,7 +25,7 @@ void SerialCommunication::handleMessage() {
   }
 }
 
-void SerialCommunication::registerHandler(const char* messageType, MessageHandler handler) {
+void SerialCommunication::registerHandler(char* messageType, MessageHandler handler) {
   // handlers[messageType] = handler;
   handlers.insert(messageType, handler);
 }
@@ -37,9 +41,6 @@ void SerialCommunication::handleMessage(char* message) {
     if (handlers.containsKey(messageType)) {
       handlers[messageType](messageContent);
     }
-    // if (handlers.find(messageType) != handlers.end()) {
-    //   handlers[messageType](messageContent);
-    // }
   }
 }
 

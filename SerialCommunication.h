@@ -13,7 +13,7 @@ private:
   char incomingDataBuffer[bufferSize];
 
   Stream* stream;
-  Map<String, MessageHandler> handlers;
+  Map<char*, MessageHandler> handlers;
   bool newDataAvailable = false;
 
   static const char startMessageMarker = '<';
@@ -22,13 +22,11 @@ private:
 public:
   static const char separator = '#';
 
-  SerialCommunication(Stream* stream)
-    : stream(stream) {}
-
   void sendMessage(const char* tag, const char* message);
   void handleMessage();
-  void registerHandler(const char* messageType, MessageHandler handler);
+  void registerHandler(char* messageType, MessageHandler handler);
   void receiveIncomingData();
+  void setStream(Stream* stream);
 
 private:
   void handleMessage(char* message);
